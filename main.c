@@ -941,9 +941,9 @@ int main(int argc, char *argv[]) {
     };
     assemble(&lex);
 
-    f = fopen("out.bin", "wb");
+    f = fopen(argv[2], "wb");
     if (f == NULL) {
-        fprintf(stderr, "Couldn't open %s\n", file_name);
+        fprintf(stderr, "Couldn't open %s\n", argv[2]);
         return 1;
     }
     export_dec_obj(f);
