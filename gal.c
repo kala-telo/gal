@@ -1,3 +1,6 @@
+// Copyright © 2025 kala_telo <kala_telo@proton.me>
+// SPDX-License-Identifier: MIT
+
 #include <assert.h>
 #include <ctype.h>
 #include <stdbool.h>
