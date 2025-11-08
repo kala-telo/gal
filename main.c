@@ -497,7 +497,11 @@ Token _expect_any(Token t, size_t count, TokenKind *ks) {
 }
 
 Token expect(Token t, TokenKind k) {
-    if (t.kind != k) TODO();
+    if (t.kind != k) {
+        fprintf(stderr, "%s:%d:%d Expected %s but got %s\n", PLOC(t.loc),
+                lex_names[k], lex_names[t.kind]);
+        exit(1);
+    }
     return t;
 }
 
@@ -658,17 +662,25 @@ int16_t parse_expr(Lexer *lex, Base base, int16_t addr) {
 }
 
 int16_t assmeble_mnemonic(Lexer *lex, Mnemonic mnem, Base *base, int16_t *addr) {
-    expect(next_token(lex), LEX_INST);
+    Loc l = expect(next_token(lex), LEX_INST).loc;
     switch (mnem.kind) {
     case T_MEM_REF: {
-        int16_t I = 0;
+        int16_t I = 0, Z = 0;
         if (string_eq(peek_token(lex).str, S("I"))) {
             next_token(lex);
             I = 1<<8;
         }
         int16_t v = parse_expr(lex, *base, *addr);
+        if (v > 0200) {
+            Z = 1<<7;
+        }
         if (v > 0) {
-            return mnem.opcode | I | (v & 0xFF);
+            if (v/128 != *addr/128 && Z != 0) {
+                fprintf(stderr, "%s:%d:%d: %o is not on the same page as %o\n",
+                        PLOC(l), v, *addr);
+                exit(1);
+            }
+            return mnem.opcode | I | Z | (v & 0x7F);
         } else {
             return -1;
         }
@@ -774,11 +786,14 @@ void assemble_once(Lexer *lex, Base *base, int16_t *addr) {
             .lexer = *lex,
         };
         while (peek_token(lex).kind != LEX_NEWLINE) {
-            if (find_mnem(&mnem, peek_token(lex).str)) {
+            if (find_mnem(&mnem, expect(peek_token(lex), LEX_INST).str)) {
                 int16_t o = assmeble_mnemonic(lex, mnem, base, addr);
                 if (o > 0) r |= o;
                 else da_append(backpatch, potential_bp);
-            } else UNREACHABLE();
+            } else {
+                printf("%.*s\n", PS(peek_token(lex).str));
+                UNREACHABLE();
+            }
         }
         ram[(*addr)++] = r;
     } break;
@@ -818,6 +833,7 @@ void assemble_once(Lexer *lex, Base *base, int16_t *addr) {
             if (v < 0) {
                 potential_bp.cause = t;
                 da_append(backpatch, potential_bp);
+                (*addr)++;
             } else {
                 ram[(*addr)++] = v;
             }
@@ -943,7 +959,7 @@ int main(int argc, char *argv[]) {
 
     f = fopen(argv[2], "wb");
     if (f == NULL) {
-        fprintf(stderr, "Couldn't open %s\n", argv[2]);
+        fprintf(stderr, "Couldn't open `%s`\n", argv[2]);
         return 1;
     }
     export_dec_obj(f);
