@@ -19,70 +19,9 @@ typedef struct {
 #define PS(s) (s).length, (s).string
 
 typedef enum {
+    T_DEFAULT,
     // MEMORY REFERENCE INSTRUCTIONS
     T_MEM_REF,
-    // PROGRAM INTERRUPT
-    T_PROG_INT,
-    // HIGH-SPEED READER
-    T_HS_READER,
-    // HIGH-SPEED PUNCH
-    T_HS_PUNCH,
-    // KEYBOARD/READER
-    T_KBD_READER,
-    // GROUP 2 OPERATES
-    T_GROUP2_OP,
-    // TELEPRINTER/PUNCH
-    T_TTY_PUNCH,
-    // GROUP 1 OPERATES
-    T_GROUP1_OP,
-    // COMBINED OPERATES
-    T_COMBINED_OP,
-    // DECTAPE DUAL TRANSPORT TYPE 555 AND CONTROL TYPE 552
-    T_DECTAPE_DUAL_555_552,
-    // DECTAPE TRANSPORT TYPE TU55 AND CONTROL TYPE TC01
-    T_DECTAPE_TU55_TC01,
-    // MEMORY PARITY TYPE 188
-    T_MEM_PARITY_188,
-    // PDP-5 EAE SYMBOLS 153*
-    T_PDP5_EAE_153,
-    // PDP-8 EAE SYMBOLS 182
-    T_PDP8_EAE_182,
-    // MEMORY EXTENSION CONTROL TYPE 183
-    T_MEM_EXT_CTRL_183,
-    // AUTO RESTART TYPE KR01
-    T_AUTO_RESTART_KR01,
-    // AD CONVERTER TYPE 189
-    T_AD_CONV_189,
-    // AD CONVERTER/MULTIPLEXER 138E/139E
-    T_AD_CONV_MUX_138E_139E,
-    // OSCILLOSCOPE DISPLAY TYPE 34D
-    T_OSC_DISPLAY_34D,
-    // SCOPE TYPE 3ON
-    T_SCOPE_3ON,
-    // LIGHT PEN TYPE 370
-    T_LIGHT_PEN_370,
-    // PLOTTER AND CONTROL TYPE 350B
-    T_PLOTTER_CTRL_350B,
-    // CARD READER AND CONTROL TYPE CR01C
-    T_CARD_READER_CTRL_CR01C,
-    // CARD READER TYPE 451
-    T_CARD_READER_451,
-    // CARD PUNCH AND CONTROL TYPE 450
-    T_CARD_PUNCH_CTRL_450,
-    // LINE PRINTER TYPE 645
-    T_LINE_PRINTER_645,
-    // SERIAL DRUM 250 AND 251
-    T_SERIAL_DRUM_250_251,
-    // MAGNETIC TAPE TYPE 57A
-    T_MAG_TAPE_57A,
-    // MAGNETIC TAPE TYPE 580
-    T_MAG_TAPE_580,
-    // OPTION TO TYPE 139E MULTIPLEXOR
-    T_OPT_139E_MUX,
-    // DATA COMMUNICATION SYSTEMS TYPE 630
-    T_DATA_COMM_630,
-    // FLOATING-POINT INSTRUCTIONS
-    T_FLOAT_PT,
 } InstKind;
 
 typedef struct {
@@ -92,201 +31,76 @@ typedef struct {
 } Mnemonic;
 
 Mnemonic mnemonics[] = {
+    {S("ION"), 06001},    {S("IOF"), 06002},   {S("RSF"), 06011},
+    {S("RRB"), 06012},    {S("RFC"), 06014},   {S("PSF"), 06021},
+    {S("PCF"), 06022},    {S("PPC"), 06024},   {S("PLS"), 06026},
+    {S("KSF"), 06031},    {S("KCC"), 06032},   {S("KRS"), 06034},
+    {S("KRB"), 06036},    {S("NOP"), 07000},   {S("IAC"), 07001},
+    {S("RAL"), 07004},    {S("RTL"), 07006},   {S("RAR"), 07010},
+    {S("RTR"), 07012},    {S("CML"), 07020},   {S("CMA"), 07040},
+    {S("CLL"), 07100},    {S("CLA"), 07200},   {S("HLT"), 07402},
+    {S("OSR"), 07404},    {S("SKP"), 07410},   {S("SNL"), 07420},
+    {S("SZL"), 07430},    {S("SZA"), 07440},   {S("SNA"), 07450},
+    {S("SMA"), 07500},    {S("SPA"), 07510},   {S("CIA"), 07041},
+    {S("LAS"), 07604},    {S("STL"), 07120},   {S("GLK"), 07204},
+    {S("STA"), 07240},    {S("MMMM"), 06757},  {S("MMSF"), 06761},
+    {S("MMMF"), 06756},   {S("MMCF"), 06772},  {S("MMML"), 06766},
+    {S("MMSC"), 06771},   {S("MMLS"), 06751},  {S("MMRS"), 06774},
+    {S("MMLM"), 06752},   {S("MMCC"), 06762},  {S("MMLF"), 06754},
+    {S("MMLC"), 06764},   {S("DTRA"), 06761},  {S("DTSF"), 06771},
+    {S("DTCA"), 06762},   {S("DTRB"), 06772},  {S("DTXA"), 06764},
+    {S("DTLB"), 06774},   {S("SMP"), 06101},   {S("CMP"), 06104},
+    {S("CAM"), 06101},    {S("SZO"), 06114},   {S("LMQ"), 06102},
+    {S("DIV"), 06121},    {S("LAR"), 06104},   {S("RDM"), 06122},
+    {S("MUL"), 06111},    {S("SAF"), 06124},   {S("RDA"), 06112},
+    {S("MUY"), 07405},    {S("ASR"), 07415},   {S("DVI"), 07407},
+    {S("LSR"), 07417},    {S("NMI"), 07411},   {S("MQL"), 07421},
+    {S("SHL"), 07413},    {S("SCA"), 07441},   {S("MQA"), 07501},
+    {S("CAM"), 07621},    {S("CDF"), 06201},   {S("RIF"), 06224},
+    {S("CIF"), 06202},    {S("RMF"), 06244},   {S("RDF"), 06214},
+    {S("RIB"), 06234},    {S("SPL"), 06102},   {S("ADC"), 06004},
+    {S("ADSF"), 06531},   {S("ADCC"), 06541},  {S("ADCV"), 06532},
+    {S("ADSC"), 06542},   {S("ADRB"), 06534},  {S("ADIC"), 06544},
+    {S("DCX"), 06051},    {S("DYL"), 06063},   {S("DXL"), 06053},
+    {S("DIX"), 06054},    {S("DCY"), 06061},   {S("DIY"), 06064},
+    {S("DXS"), 06057},    {S("DYS"), 06067},   {S("DLB"), 06074},
+    {S("DSF"), 06071},    {S("DCF"), 06072},   {S("PLSF"), 06501},
+    {S("PLCF"), 06502},   {S("PLPU"), 06504},  {S("PLPR"), 06511},
+    {S("PLPU"), 06512},   {S("PLDD"), 06514},  {S("PLPL"), 06521},
+    {S("PLUD"), 06522},   {S("PLPD"), 06524},  {S("RCSF"), 06631},
+    {S("RCSP"), 06671},   {S("RCRA"), 06632},  {S("RCSE"), 06671},
+    {S("RCRB"), 06634},   {S("RCRD"), 06674},  {S("CRSF"), 06632},
+    {S("CERS"), 06634},   {S("CRRB"), 06671},  {S("CRSA"), 06672},
+    {S("CRSB"), 06674},   {S("CPSF"), 06631},  {S("CPSE"), 06642},
+    {S("CPLB"), 06644},   {S("CPCF"), 06641},  {S("LCF"), 06652},
+    {S("LPR"), 06655},    {S("LSF"), 06661},   {S("LCB"), 06662},
+    {S("LLB"), 06664},    {S("DRCR"), 06603},  {S("DRCF"), 06611},
+    {S("DRTS"), 06615},   {S("DRSC"), 06622},  {S("DRCW"), 06605},
+    {S("DREF"), 06612},   {S("DRSE"), 06621},  {S("DRCN"), 06624},
+    {S("MSCR"), 06701},   {S("MTS"), 06706},   {S("MNC"), 06712},
+    {S("MSWF"), 06721},   {S("MCWF"), 06722},  {S("MIWF"), 06722},
+    {S("MDEF"), 06732},   {S("MEEF"), 06732},  {S("MTRS"), 06734},
+    {S("MRWC"), 06742},   {S("MCD"), 06702},   {S("MSUR"), 06711},
+    {S("MTC"), 06716},    {S("MDWF"), 06722},  {S("MEWF"), 06722},
+    {S("MSEF"), 06731},   {S("MCED"), 06732},  {S("MIEF"), 06732},
+    {S("MCC"), 06741},    {S("MRCA"), 06744},  {S("MCA"), 06745},
+    {S("TSRD"), 06715},   {S("TSWR"), 06716},  {S("TSSR"), 06722},
+    {S("TWRT"), 06731},   {S("TSRS"), 06734},  {S("TIFM"), 06707},
+    {S("TSDF"), 06721},   {S("TSST"), 06724},  {S("TCPI"), 06732},
+    {S("TTINCR"), 06401}, {S("TTI"), 06402},   {S("TTO"), 06404},
+    {S("TTCL"), 06411},   {S("TTSL"), 06412},  {S("TTRL"), 06414},
+    {S("TTSKP"), 06421},  {S("TTXON"), 06422}, {S("TTXOF"), 06424},
+    {S("FEXT"), 00000},   {S("FADD"), 01000},  {S("FSUB"), 02000},
+    {S("FMPY"), 03000},   {S("FDIV"), 04000},  {S("FGET"), 05000},
+    {S("FPUT"), 06000},   {S("FNOR"), 07000},  {S("TSF"), 06041},
+    {S("TCF"), 06042},    {S("TLS"), 06046},   {S("TPC"), 06044},
+
     {S("AND"), 00000, T_MEM_REF},
     {S("TAD"), 01000, T_MEM_REF},
     {S("ISZ"), 02000, T_MEM_REF},
     {S("DCA"), 03000, T_MEM_REF},
     {S("JMS"), 04000, T_MEM_REF},
     {S("JMP"), 05000, T_MEM_REF},
-    {S("ION"), 06001, T_PROG_INT},
-    {S("IOF"), 06002, T_PROG_INT},
-    {S("RSF"), 06011, T_HS_READER},
-    {S("RRB"), 06012, T_HS_READER},
-    {S("RFC"), 06014, T_HS_READER},
-    {S("PSF"), 06021, T_HS_PUNCH},
-    {S("PCF"), 06022, T_HS_PUNCH},
-    {S("PPC"), 06024, T_HS_PUNCH},
-    {S("PLS"), 06026, T_HS_PUNCH},
-    {S("KSF"), 06031, T_KBD_READER},
-    {S("KCC"), 06032, T_KBD_READER},
-    {S("KRS"), 06034, T_KBD_READER},
-    {S("KRB"), 06036, T_KBD_READER},
-    {S("NOP"), 07000, T_GROUP1_OP},
-    {S("IAC"), 07001, T_GROUP1_OP},
-    {S("RAL"), 07004, T_GROUP1_OP},
-    {S("RTL"), 07006, T_GROUP1_OP},
-    {S("RAR"), 07010, T_GROUP1_OP},
-    {S("RTR"), 07012, T_GROUP1_OP},
-    {S("CML"), 07020, T_GROUP1_OP},
-    {S("CMA"), 07040, T_GROUP1_OP},
-    {S("CLL"), 07100, T_GROUP1_OP},
-    {S("CLA"), 07200, T_GROUP1_OP},
-    {S("HLT"), 07402, T_GROUP2_OP},
-    {S("OSR"), 07404, T_GROUP2_OP},
-    {S("SKP"), 07410, T_GROUP2_OP},
-    {S("SNL"), 07420, T_GROUP2_OP},
-    {S("SZL"), 07430, T_GROUP2_OP},
-    {S("SZA"), 07440, T_GROUP2_OP},
-    {S("SNA"), 07450, T_GROUP2_OP},
-    {S("SMA"), 07500, T_GROUP2_OP},
-    {S("SPA"), 07510, T_GROUP2_OP},
-    {S("CIA"), 07041, T_COMBINED_OP},
-    {S("LAS"), 07604, T_COMBINED_OP},
-    {S("STL"), 07120, T_COMBINED_OP},
-    {S("GLK"), 07204, T_COMBINED_OP},
-    {S("STA"), 07240, T_COMBINED_OP},
-    {S("MMMM"), 06757, T_DECTAPE_DUAL_555_552},
-    {S("MMSF"), 06761, T_DECTAPE_DUAL_555_552},
-    {S("MMMF"), 06756, T_DECTAPE_DUAL_555_552},
-    {S("MMCF"), 06772, T_DECTAPE_DUAL_555_552},
-    {S("MMML"), 06766, T_DECTAPE_DUAL_555_552},
-    {S("MMSC"), 06771, T_DECTAPE_DUAL_555_552},
-    {S("MMLS"), 06751, T_DECTAPE_DUAL_555_552},
-    {S("MMRS"), 06774, T_DECTAPE_DUAL_555_552},
-    {S("MMLM"), 06752, T_DECTAPE_DUAL_555_552},
-    {S("MMCC"), 06762, T_DECTAPE_DUAL_555_552},
-    {S("MMLF"), 06754, T_DECTAPE_DUAL_555_552},
-    {S("MMLC"), 06764, T_DECTAPE_DUAL_555_552},
-    {S("DTRA"), 06761, T_DECTAPE_TU55_TC01},
-    {S("DTSF"), 06771, T_DECTAPE_TU55_TC01},
-    {S("DTCA"), 06762, T_DECTAPE_TU55_TC01},
-    {S("DTRB"), 06772, T_DECTAPE_TU55_TC01},
-    {S("DTXA"), 06764, T_DECTAPE_TU55_TC01},
-    {S("DTLB"), 06774, T_DECTAPE_TU55_TC01},
-    {S("SMP"), 06101, T_MEM_PARITY_188},
-    {S("CMP"), 06104, T_MEM_PARITY_188},
-    {S("CAM"), 06101, T_PDP5_EAE_153},
-    {S("SZO"), 06114, T_PDP5_EAE_153},
-    {S("LMQ"), 06102, T_PDP5_EAE_153},
-    {S("DIV"), 06121, T_PDP5_EAE_153},
-    {S("LAR"), 06104, T_PDP5_EAE_153},
-    {S("RDM"), 06122, T_PDP5_EAE_153},
-    {S("MUL"), 06111, T_PDP5_EAE_153},
-    {S("SAF"), 06124, T_PDP5_EAE_153},
-    {S("RDA"), 06112, T_PDP5_EAE_153},
-    {S("MUY"), 07405, T_PDP8_EAE_182},
-    {S("ASR"), 07415, T_PDP8_EAE_182},
-    {S("DVI"), 07407, T_PDP8_EAE_182},
-    {S("LSR"), 07417, T_PDP8_EAE_182},
-    {S("NMI"), 07411, T_PDP8_EAE_182},
-    {S("MQL"), 07421, T_PDP8_EAE_182},
-    {S("SHL"), 07413, T_PDP8_EAE_182},
-    {S("SCA"), 07441, T_PDP8_EAE_182},
-    {S("MQA"), 07501, T_PDP8_EAE_182},
-    {S("CAM"), 07621, T_PDP8_EAE_182},
-    {S("CDF"), 06201, T_MEM_EXT_CTRL_183},
-    {S("RIF"), 06224, T_MEM_EXT_CTRL_183},
-    {S("CIF"), 06202, T_MEM_EXT_CTRL_183},
-    {S("RMF"), 06244, T_MEM_EXT_CTRL_183},
-    {S("RDF"), 06214, T_MEM_EXT_CTRL_183},
-    {S("RIB"), 06234, T_MEM_EXT_CTRL_183},
-    {S("SPL"), 06102, T_AUTO_RESTART_KR01},
-    {S("ADC"), 06004, T_AD_CONV_189},
-    {S("ADSF"), 06531, T_AD_CONV_MUX_138E_139E},
-    {S("ADCC"), 06541, T_AD_CONV_MUX_138E_139E},
-    {S("ADCV"), 06532, T_AD_CONV_MUX_138E_139E},
-    {S("ADSC"), 06542, T_AD_CONV_MUX_138E_139E},
-    {S("ADRB"), 06534, T_AD_CONV_MUX_138E_139E},
-    {S("ADIC"), 06544, T_AD_CONV_MUX_138E_139E},
-    {S("DCX"), 06051, T_OSC_DISPLAY_34D},
-    {S("DYL"), 06063, T_OSC_DISPLAY_34D},
-    {S("DXL"), 06053, T_OSC_DISPLAY_34D},
-    {S("DIX"), 06054, T_OSC_DISPLAY_34D},
-    {S("DCY"), 06061, T_OSC_DISPLAY_34D},
-    {S("DIY"), 06064, T_OSC_DISPLAY_34D},
-    {S("DXS"), 06057, T_OSC_DISPLAY_34D},
-    {S("DYS"), 06067, T_OSC_DISPLAY_34D},
-    {S("DLB"), 06074, T_SCOPE_3ON},
-    {S("DSF"), 06071, T_LIGHT_PEN_370},
-    {S("DCF"), 06072, T_LIGHT_PEN_370},
-    {S("PLSF"), 06501, T_PLOTTER_CTRL_350B},
-    {S("PLCF"), 06502, T_PLOTTER_CTRL_350B},
-    {S("PLPU"), 06504, T_PLOTTER_CTRL_350B},
-    {S("PLPR"), 06511, T_PLOTTER_CTRL_350B},
-    {S("PLPU"), 06512, T_PLOTTER_CTRL_350B},
-    {S("PLDD"), 06514, T_PLOTTER_CTRL_350B},
-    {S("PLPL"), 06521, T_PLOTTER_CTRL_350B},
-    {S("PLUD"), 06522, T_PLOTTER_CTRL_350B},
-    {S("PLPD"), 06524, T_PLOTTER_CTRL_350B},
-    {S("RCSF"), 06631, T_CARD_READER_451},
-    {S("RCSP"), 06671, T_CARD_READER_451},
-    {S("RCRA"), 06632, T_CARD_READER_451},
-    {S("RCSE"), 06671, T_CARD_READER_451},
-    {S("RCRB"), 06634, T_CARD_READER_451},
-    {S("RCRD"), 06674, T_CARD_READER_451},
-    {S("CRSF"), 06632, T_CARD_READER_451},
-    {S("CERS"), 06634, T_CARD_READER_451},
-    {S("CRRB"), 06671, T_CARD_READER_451},
-    {S("CRSA"), 06672, T_CARD_READER_451},
-    {S("CRSB"), 06674, T_CARD_READER_451},
-    {S("CPSF"), 06631, T_CARD_PUNCH_CTRL_450},
-    {S("CPSE"), 06642, T_CARD_PUNCH_CTRL_450},
-    {S("CPLB"), 06644, T_CARD_PUNCH_CTRL_450},
-    {S("CPCF"), 06641, T_CARD_PUNCH_CTRL_450},
-    {S("LCF"), 06652, T_LINE_PRINTER_645},
-    {S("LPR"), 06655, T_LINE_PRINTER_645},
-    {S("LSF"), 06661, T_LINE_PRINTER_645},
-    {S("LCB"), 06662, T_LINE_PRINTER_645},
-    {S("LLB"), 06664, T_LINE_PRINTER_645},
-    {S("DRCR"), 06603, T_SERIAL_DRUM_250_251},
-    {S("DRCF"), 06611, T_SERIAL_DRUM_250_251},
-    {S("DRTS"), 06615, T_SERIAL_DRUM_250_251},
-    {S("DRSC"), 06622, T_SERIAL_DRUM_250_251},
-    {S("DRCW"), 06605, T_SERIAL_DRUM_250_251},
-    {S("DREF"), 06612, T_SERIAL_DRUM_250_251},
-    {S("DRSE"), 06621, T_SERIAL_DRUM_250_251},
-    {S("DRCN"), 06624, T_SERIAL_DRUM_250_251},
-    {S("MSCR"), 06701, T_MAG_TAPE_57A},
-    {S("MTS"), 06706, T_MAG_TAPE_57A},
-    {S("MNC"), 06712, T_MAG_TAPE_57A},
-    {S("MSWF"), 06721, T_MAG_TAPE_57A},
-    {S("MCWF"), 06722, T_MAG_TAPE_57A},
-    {S("MIWF"), 06722, T_MAG_TAPE_57A},
-    {S("MDEF"), 06732, T_MAG_TAPE_57A},
-    {S("MEEF"), 06732, T_MAG_TAPE_57A},
-    {S("MTRS"), 06734, T_MAG_TAPE_57A},
-    {S("MRWC"), 06742, T_MAG_TAPE_57A},
-    {S("MCD"), 06702, T_MAG_TAPE_57A},
-    {S("MSUR"), 06711, T_MAG_TAPE_57A},
-    {S("MTC"), 06716, T_MAG_TAPE_57A},
-    {S("MDWF"), 06722, T_MAG_TAPE_57A},
-    {S("MEWF"), 06722, T_MAG_TAPE_57A},
-    {S("MSEF"), 06731, T_MAG_TAPE_57A},
-    {S("MCED"), 06732, T_MAG_TAPE_57A},
-    {S("MIEF"), 06732, T_MAG_TAPE_57A},
-    {S("MCC"), 06741, T_MAG_TAPE_57A},
-    {S("MRCA"), 06744, T_MAG_TAPE_57A},
-    {S("MCA"), 06745, T_MAG_TAPE_57A},
-    {S("TSRD"), 06715, T_MAG_TAPE_580},
-    {S("TSWR"), 06716, T_MAG_TAPE_580},
-    {S("TSSR"), 06722, T_MAG_TAPE_580},
-    {S("TWRT"), 06731, T_MAG_TAPE_580},
-    {S("TSRS"), 06734, T_MAG_TAPE_580},
-    {S("TIFM"), 06707, T_MAG_TAPE_580},
-    {S("TSDF"), 06721, T_MAG_TAPE_580},
-    {S("TSST"), 06724, T_MAG_TAPE_580},
-    {S("TCPI"), 06732, T_MAG_TAPE_580},
-    {S("TTINCR"), 06401, T_DATA_COMM_630},
-    {S("TTI"), 06402, T_DATA_COMM_630},
-    {S("TTO"), 06404, T_DATA_COMM_630},
-    {S("TTCL"), 06411, T_DATA_COMM_630},
-    {S("TTSL"), 06412, T_DATA_COMM_630},
-    {S("TTRL"), 06414, T_DATA_COMM_630},
-    {S("TTSKP"), 06421, T_DATA_COMM_630},
-    {S("TTXON"), 06422, T_DATA_COMM_630},
-    {S("TTXOF"), 06424, T_DATA_COMM_630},
-    {S("FEXT"), 00000, T_FLOAT_PT},
-    {S("FADD"), 01000, T_FLOAT_PT},
-    {S("FSUB"), 02000, T_FLOAT_PT},
-    {S("FMPY"), 03000, T_FLOAT_PT},
-    {S("FDIV"), 04000, T_FLOAT_PT},
-    {S("FGET"), 05000, T_FLOAT_PT},
-    {S("FPUT"), 06000, T_FLOAT_PT},
-    {S("FNOR"), 07000, T_FLOAT_PT},
-    {S("TSF"),  06041, T_TTY_PUNCH},
-    {S("TCF"),  06042, T_TTY_PUNCH},
-    {S("TLS"),  06046, T_TTY_PUNCH},
-    {S("TPC"),  06044, T_TTY_PUNCH},
 };
 
 #define ARRLEN(xs) (sizeof(xs)/sizeof(*(xs)))
@@ -700,88 +514,8 @@ int16_t assemble_mnemonic(Lexer *lex, Mnemonic mnem, Base *base, int16_t *addr, 
             return -1;
         }
     } break;
-    case T_PROG_INT:
-        TODO();
-        break;
-    case T_HS_READER:
-        TODO();
-        break;
-    case T_HS_PUNCH:
-        TODO();
-        break;
-    case T_KBD_READER:
-    case T_GROUP2_OP:
-    case T_TTY_PUNCH:
-    case T_COMBINED_OP:
-    case T_PDP8_EAE_182:
-    case T_GROUP1_OP:
+    case T_DEFAULT:
         return mnem.opcode;
-    case T_DECTAPE_DUAL_555_552:
-        TODO();
-        break;
-    case T_DECTAPE_TU55_TC01:
-        TODO();
-        break;
-    case T_MEM_PARITY_188:
-        TODO();
-        break;
-    case T_PDP5_EAE_153:
-        TODO();
-        break;
-    case T_MEM_EXT_CTRL_183:
-        TODO();
-        break;
-    case T_AUTO_RESTART_KR01:
-        TODO();
-        break;
-    case T_AD_CONV_189:
-        TODO();
-        break;
-    case T_AD_CONV_MUX_138E_139E:
-        TODO();
-        break;
-    case T_OSC_DISPLAY_34D:
-        TODO();
-        break;
-    case T_SCOPE_3ON:
-        TODO();
-        break;
-    case T_LIGHT_PEN_370:
-        TODO();
-        break;
-    case T_PLOTTER_CTRL_350B:
-        TODO();
-        break;
-    case T_CARD_READER_CTRL_CR01C:
-        TODO();
-        break;
-    case T_CARD_READER_451:
-        TODO();
-        break;
-    case T_CARD_PUNCH_CTRL_450:
-        TODO();
-        break;
-    case T_LINE_PRINTER_645:
-        TODO();
-        break;
-    case T_SERIAL_DRUM_250_251:
-        TODO();
-        break;
-    case T_MAG_TAPE_57A:
-        TODO();
-        break;
-    case T_MAG_TAPE_580:
-        TODO();
-        break;
-    case T_OPT_139E_MUX:
-        TODO();
-        break;
-    case T_DATA_COMM_630:
-        TODO();
-        break;
-    case T_FLOAT_PT:
-        TODO();
-        break;
     }
     return -1;
 }
