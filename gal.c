@@ -575,6 +575,10 @@ Token next_token(Lexer *lex) {
         return (Token){.kind = LEX_NEWLINE,
                        .str = (String){lex->code, 1},
                        .loc = lex->loc};
+    case '$':
+        return (Token){.kind = LEX_END,
+                       .str = (String){lex->code, 1},
+                       .loc = lex->loc};
     default:
         if (isdigit(*lex->code)) {
             String word = {
@@ -616,8 +620,15 @@ fail:
 
 Token peek_token(Lexer *lex) {
     Lexer copy = *lex;
-    Token t = next_token(&copy);
-    return t;
+    return next_token(&copy);
+}
+
+Token peek_token_n(Lexer *lex, size_t n) {
+    Lexer copy = *lex;
+    assert(n > 0);
+    for (size_t i = 0; i < n-1; i++)
+        next_token(&copy);
+    return next_token(&copy);
 }
 
 int16_t parse_var_or_int(Lexer *lex, Base base, int16_t addr) {
@@ -643,17 +654,20 @@ int16_t parse_var_or_int(Lexer *lex, Base base, int16_t addr) {
     return -1;
 }
 
-int16_t parse_expr(Lexer *lex, Base base, int16_t addr) {
+int16_t parse_expr(Lexer *lex, Base base, int16_t addr, Token *bp_cause) {
+    Token potential_bp_cause = peek_token(lex);
     int16_t v = parse_var_or_int(lex, base, addr);
+    if (v < 0)
+        *bp_cause = potential_bp_cause;
     while (is_kind_binop(peek_token(lex).kind)) {
         TokenKind op = next_token(lex).kind;
         int16_t dv = parse_var_or_int(lex, base, addr);
         switch (op) {
         case LEX_PLUS:
-            if (v > 0) v += dv;
+            if (v >= 0) v += dv;
             break;
         case LEX_MINUS:
-            if (v > 0) v -= dv;
+            if (v >= 0) v -= dv;
             break;
         default:
             TODO();
@@ -662,7 +676,7 @@ int16_t parse_expr(Lexer *lex, Base base, int16_t addr) {
     return v;
 }
 
-int16_t assmeble_mnemonic(Lexer *lex, Mnemonic mnem, Base *base, int16_t *addr) {
+int16_t assemble_mnemonic(Lexer *lex, Mnemonic mnem, Base *base, int16_t *addr, Token *bp_cause) {
     Loc l = expect(next_token(lex), LEX_INST).loc;
     switch (mnem.kind) {
     case T_MEM_REF: {
@@ -671,11 +685,11 @@ int16_t assmeble_mnemonic(Lexer *lex, Mnemonic mnem, Base *base, int16_t *addr) 
             next_token(lex);
             I = 1<<8;
         }
-        int16_t v = parse_expr(lex, *base, *addr);
+        int16_t v = parse_expr(lex, *base, *addr, bp_cause);
         if (v > 0200) {
             Z = 1<<7;
         }
-        if (v > 0) {
+        if (v >= 0) {
             if (v/128 != *addr/128 && Z != 0) {
                 fprintf(stderr, "%s:%d:%d: %o is not on the same page as %o\n",
                         PLOC(l), v, *addr);
@@ -779,22 +793,39 @@ void assemble_once(Lexer *lex, Base *base, int16_t *addr) {
         break;
     case LEX_INST: {
         Mnemonic mnem;
-        int16_t r = 0;
         BackpatchEntry potential_bp = (BackpatchEntry){
             .cause = peek_token(lex),
             .addr = *addr,
             .base = *base,
             .lexer = *lex,
         };
-        while (peek_token(lex).kind != LEX_NEWLINE) {
-            if (find_mnem(&mnem, expect(peek_token(lex), LEX_INST).str)) {
-                int16_t o = assmeble_mnemonic(lex, mnem, base, addr);
-                if (o > 0) r |= o;
-                else da_append(backpatch, potential_bp);
-            } else {
-                printf("%.*s\n", PS(peek_token(lex).str));
-                UNREACHABLE();
+        if (peek_token_n(lex, 2).kind == LEX_EQ) {
+            Token t = next_token(lex);
+            next_token(lex);
+            if (!find_mnem(&mnem, t.str)) UNREACHABLE();
+            int16_t n = parse_expr(lex, *base, *addr, &potential_bp.cause);
+            if (n < 0) {
+                da_append(backpatch, potential_bp);
+                break;
             }
+            if (n != mnem.opcode) {
+                fprintf(stderr,
+                        "%s:%d:%d Redefining mnemonics is not supported! "
+                        "(%.*s)\n",
+                        PLOC(t.loc), PS(t.str));
+                exit(1);
+            }
+            break;
+        }
+        int16_t r = 0;
+        while (peek_token(lex).kind != LEX_NEWLINE && peek_token(lex).kind != LEX_END) {
+            Token t = expect(peek_token(lex), LEX_INST);
+            potential_bp.cause = t;
+            if (find_mnem(&mnem, t.str)) {
+                int16_t o = assemble_mnemonic(lex, mnem, base, addr, &potential_bp.cause);
+                if (o >= 0) r |= o;
+                else da_append(backpatch, potential_bp);
+            } else UNREACHABLE();
         }
         ram[(*addr)++] = r;
     } break;
@@ -830,9 +861,9 @@ void assemble_once(Lexer *lex, Base *base, int16_t *addr) {
             *lex = potential_bp.lexer;
             *addr = potential_bp.addr;
             *base = potential_bp.base;
-            int16_t v = parse_expr(lex, *base, *addr);
+            potential_bp.cause = t;
+            int16_t v = parse_expr(lex, *base, *addr, &potential_bp.cause);
             if (v < 0) {
-                potential_bp.cause = t;
                 da_append(backpatch, potential_bp);
                 (*addr)++;
             } else {
@@ -894,6 +925,9 @@ void assemble(Lexer *lex) {
         BackpatchEntry bp = backpatch.data[i];
         printf("%s:%d:%d: Error: Undefined name `%.*s`\n", PLOC(bp.cause.loc), PS(bp.cause.str));
     }
+    if (backpatch.len > bp_count) {
+        exit(1);
+    }
     backpatch.len = 0;
 }
 
@@ -915,28 +949,48 @@ void export_dec_obj(FILE *out) {
 #undef O
 }
 
-// char *next_arg(int* argc, char ***argv, char* error) {
-//     if (*argc == 0) {
-//         if (error != NULL) {
-//             fprintf(stderr, "%s\n", error);
-//         }
-//         exit(1);
-//     }
-//     char *result = **argv;
-//     (*argc)--;
-//     (*argv)++;
-//     return result;
-// }
+char *next_arg(int* argc, char ***argv, char* error) {
+    if (*argc == 0) {
+        if (error != NULL) {
+            fprintf(stderr, "%s\n", error);
+        }
+        exit(1);
+    }
+    char *result = **argv;
+    (*argc)--;
+    (*argv)++;
+    return result;
+}
 
 int main(int argc, char *argv[]) {
-    if (argc != 3) {
-        fprintf(stderr, "Usage: %s <input.pal> <output.bin>\n", argv[0]);
+    char *program_name = next_arg(&argc, &argv, NULL),
+         *input_file   = NULL,
+         *output_file  = NULL;
+    while (argc) {
+        char *arg = next_arg(&argc, &argv, NULL);
+        if (strcmp(arg, "-o") == 0) {
+            output_file = next_arg(&argc, &argv, "Argument `-o` expects output filename next");
+        } else if (strcmp(arg, "-static") == 0) { // just compatibility with GAS
+        } else {
+            if (!input_file) {
+                input_file = arg;
+            } else {
+                fprintf(stderr, "GAL doesn't accept more than 1 input file: %s, %s provided.\n", input_file, arg);
+                return 1;
+            }
+        }
+    }
+    if (!input_file) {
+        fprintf(stderr, "No input file was provided.\n");
         return 1;
     }
-    char *file_name = argv[1];
-    FILE* f = fopen(file_name, "r");
+    if (!output_file) {
+        fprintf(stderr, "No output file was provided.\n");
+        return 1;
+    }
+    FILE *f = fopen(input_file, "r");
     if (f == NULL) {
-        fprintf(stderr, "Couldn't open %s\n", file_name);
+        fprintf(stderr, "Couldn't open %s\n", input_file);
         return 1;
     }
     fseek(f, 0, SEEK_END);
@@ -954,13 +1008,13 @@ int main(int argc, char *argv[]) {
     Lexer lex = (Lexer){
         .len = size - 1,
         .code = str.string,
-        .loc = (Loc){0, 0, file_name},
+        .loc = (Loc){0, 0, input_file},
     };
     assemble(&lex);
 
-    f = fopen(argv[2], "wb");
+    f = fopen(output_file, "wb");
     if (f == NULL) {
-        fprintf(stderr, "Couldn't open `%s`\n", argv[2]);
+        fprintf(stderr, "Couldn't open `%s`\n", output_file);
         return 1;
     }
     export_dec_obj(f);
