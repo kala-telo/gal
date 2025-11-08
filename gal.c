@@ -31,69 +31,38 @@ typedef struct {
 } Mnemonic;
 
 Mnemonic mnemonics[] = {
-    {S("ION"), 06001},    {S("IOF"), 06002},   {S("RSF"), 06011},
-    {S("RRB"), 06012},    {S("RFC"), 06014},   {S("PSF"), 06021},
-    {S("PCF"), 06022},    {S("PPC"), 06024},   {S("PLS"), 06026},
-    {S("KSF"), 06031},    {S("KCC"), 06032},   {S("KRS"), 06034},
-    {S("KRB"), 06036},    {S("NOP"), 07000},   {S("IAC"), 07001},
-    {S("RAL"), 07004},    {S("RTL"), 07006},   {S("RAR"), 07010},
-    {S("RTR"), 07012},    {S("CML"), 07020},   {S("CMA"), 07040},
-    {S("CLL"), 07100},    {S("CLA"), 07200},   {S("HLT"), 07402},
-    {S("OSR"), 07404},    {S("SKP"), 07410},   {S("SNL"), 07420},
-    {S("SZL"), 07430},    {S("SZA"), 07440},   {S("SNA"), 07450},
-    {S("SMA"), 07500},    {S("SPA"), 07510},   {S("CIA"), 07041},
-    {S("LAS"), 07604},    {S("STL"), 07120},   {S("GLK"), 07204},
-    {S("STA"), 07240},    {S("MMMM"), 06757},  {S("MMSF"), 06761},
-    {S("MMMF"), 06756},   {S("MMCF"), 06772},  {S("MMML"), 06766},
-    {S("MMSC"), 06771},   {S("MMLS"), 06751},  {S("MMRS"), 06774},
-    {S("MMLM"), 06752},   {S("MMCC"), 06762},  {S("MMLF"), 06754},
-    {S("MMLC"), 06764},   {S("DTRA"), 06761},  {S("DTSF"), 06771},
-    {S("DTCA"), 06762},   {S("DTRB"), 06772},  {S("DTXA"), 06764},
-    {S("DTLB"), 06774},   {S("SMP"), 06101},   {S("CMP"), 06104},
-    {S("CAM"), 06101},    {S("SZO"), 06114},   {S("LMQ"), 06102},
-    {S("DIV"), 06121},    {S("LAR"), 06104},   {S("RDM"), 06122},
-    {S("MUL"), 06111},    {S("SAF"), 06124},   {S("RDA"), 06112},
-    {S("MUY"), 07405},    {S("ASR"), 07415},   {S("DVI"), 07407},
-    {S("LSR"), 07417},    {S("NMI"), 07411},   {S("MQL"), 07421},
-    {S("SHL"), 07413},    {S("SCA"), 07441},   {S("MQA"), 07501},
-    {S("CAM"), 07621},    {S("CDF"), 06201},   {S("RIF"), 06224},
-    {S("CIF"), 06202},    {S("RMF"), 06244},   {S("RDF"), 06214},
-    {S("RIB"), 06234},    {S("SPL"), 06102},   {S("ADC"), 06004},
-    {S("ADSF"), 06531},   {S("ADCC"), 06541},  {S("ADCV"), 06532},
-    {S("ADSC"), 06542},   {S("ADRB"), 06534},  {S("ADIC"), 06544},
-    {S("DCX"), 06051},    {S("DYL"), 06063},   {S("DXL"), 06053},
-    {S("DIX"), 06054},    {S("DCY"), 06061},   {S("DIY"), 06064},
-    {S("DXS"), 06057},    {S("DYS"), 06067},   {S("DLB"), 06074},
-    {S("DSF"), 06071},    {S("DCF"), 06072},   {S("PLSF"), 06501},
-    {S("PLCF"), 06502},   {S("PLPU"), 06504},  {S("PLPR"), 06511},
-    {S("PLPU"), 06512},   {S("PLDD"), 06514},  {S("PLPL"), 06521},
-    {S("PLUD"), 06522},   {S("PLPD"), 06524},  {S("RCSF"), 06631},
-    {S("RCSP"), 06671},   {S("RCRA"), 06632},  {S("RCSE"), 06671},
-    {S("RCRB"), 06634},   {S("RCRD"), 06674},  {S("CRSF"), 06632},
-    {S("CERS"), 06634},   {S("CRRB"), 06671},  {S("CRSA"), 06672},
-    {S("CRSB"), 06674},   {S("CPSF"), 06631},  {S("CPSE"), 06642},
-    {S("CPLB"), 06644},   {S("CPCF"), 06641},  {S("LCF"), 06652},
-    {S("LPR"), 06655},    {S("LSF"), 06661},   {S("LCB"), 06662},
-    {S("LLB"), 06664},    {S("DRCR"), 06603},  {S("DRCF"), 06611},
-    {S("DRTS"), 06615},   {S("DRSC"), 06622},  {S("DRCW"), 06605},
-    {S("DREF"), 06612},   {S("DRSE"), 06621},  {S("DRCN"), 06624},
-    {S("MSCR"), 06701},   {S("MTS"), 06706},   {S("MNC"), 06712},
-    {S("MSWF"), 06721},   {S("MCWF"), 06722},  {S("MIWF"), 06722},
-    {S("MDEF"), 06732},   {S("MEEF"), 06732},  {S("MTRS"), 06734},
-    {S("MRWC"), 06742},   {S("MCD"), 06702},   {S("MSUR"), 06711},
-    {S("MTC"), 06716},    {S("MDWF"), 06722},  {S("MEWF"), 06722},
-    {S("MSEF"), 06731},   {S("MCED"), 06732},  {S("MIEF"), 06732},
-    {S("MCC"), 06741},    {S("MRCA"), 06744},  {S("MCA"), 06745},
-    {S("TSRD"), 06715},   {S("TSWR"), 06716},  {S("TSSR"), 06722},
-    {S("TWRT"), 06731},   {S("TSRS"), 06734},  {S("TIFM"), 06707},
-    {S("TSDF"), 06721},   {S("TSST"), 06724},  {S("TCPI"), 06732},
-    {S("TTINCR"), 06401}, {S("TTI"), 06402},   {S("TTO"), 06404},
-    {S("TTCL"), 06411},   {S("TTSL"), 06412},  {S("TTRL"), 06414},
-    {S("TTSKP"), 06421},  {S("TTXON"), 06422}, {S("TTXOF"), 06424},
-    {S("FEXT"), 00000},   {S("FADD"), 01000},  {S("FSUB"), 02000},
-    {S("FMPY"), 03000},   {S("FDIV"), 04000},  {S("FGET"), 05000},
-    {S("FPUT"), 06000},   {S("FNOR"), 07000},  {S("TSF"), 06041},
-    {S("TCF"), 06042},    {S("TLS"), 06046},   {S("TPC"), 06044},
+    {S("ION"), 06001},    {S("IOF"), 06002},   {S("RSF"), 06011},   {S("RRB"), 06012},    {S("RFC"), 06014},   {S("PSF"), 06021},
+    {S("PCF"), 06022},    {S("PPC"), 06024},   {S("PLS"), 06026},   {S("KSF"), 06031},    {S("KCC"), 06032},   {S("KRS"), 06034},
+    {S("KRB"), 06036},    {S("NOP"), 07000},   {S("IAC"), 07001},   {S("RAL"), 07004},    {S("RTL"), 07006},   {S("RAR"), 07010},
+    {S("RTR"), 07012},    {S("CML"), 07020},   {S("CMA"), 07040},   {S("CLL"), 07100},    {S("CLA"), 07200},   {S("HLT"), 07402},
+    {S("OSR"), 07404},    {S("SKP"), 07410},   {S("SNL"), 07420},   {S("SZL"), 07430},    {S("SZA"), 07440},   {S("SNA"), 07450},
+    {S("SMA"), 07500},    {S("SPA"), 07510},   {S("CIA"), 07041},   {S("LAS"), 07604},    {S("STL"), 07120},   {S("GLK"), 07204},
+    {S("STA"), 07240},    {S("MMMM"), 06757},  {S("MMSF"), 06761},  {S("MMMF"), 06756},   {S("MMCF"), 06772},  {S("MMML"), 06766},
+    {S("MMSC"), 06771},   {S("MMLS"), 06751},  {S("MMRS"), 06774},  {S("MMLM"), 06752},   {S("MMCC"), 06762},  {S("MMLF"), 06754},
+    {S("MMLC"), 06764},   {S("DTRA"), 06761},  {S("DTSF"), 06771},  {S("DTCA"), 06762},   {S("DTRB"), 06772},  {S("DTXA"), 06764},
+    {S("DTLB"), 06774},   {S("SMP"), 06101},   {S("CMP"), 06104},   {S("CAM"), 06101},    {S("SZO"), 06114},   {S("LMQ"), 06102},
+    {S("DIV"), 06121},    {S("LAR"), 06104},   {S("RDM"), 06122},   {S("MUL"), 06111},    {S("SAF"), 06124},   {S("RDA"), 06112},
+    {S("MUY"), 07405},    {S("ASR"), 07415},   {S("DVI"), 07407},   {S("LSR"), 07417},    {S("NMI"), 07411},   {S("MQL"), 07421},
+    {S("SHL"), 07413},    {S("SCA"), 07441},   {S("MQA"), 07501},   {S("CAM"), 07621},    {S("CDF"), 06201},   {S("RIF"), 06224},
+    {S("CIF"), 06202},    {S("RMF"), 06244},   {S("RDF"), 06214},   {S("RIB"), 06234},    {S("SPL"), 06102},   {S("ADC"), 06004},
+    {S("ADSF"), 06531},   {S("ADCC"), 06541},  {S("ADCV"), 06532},  {S("ADSC"), 06542},   {S("ADRB"), 06534},  {S("ADIC"), 06544},
+    {S("DCX"), 06051},    {S("DYL"), 06063},   {S("DXL"), 06053},   {S("DIX"), 06054},    {S("DCY"), 06061},   {S("DIY"), 06064},
+    {S("DXS"), 06057},    {S("DYS"), 06067},   {S("DLB"), 06074},   {S("DSF"), 06071},    {S("DCF"), 06072},   {S("PLSF"), 06501},
+    {S("PLCF"), 06502},   {S("PLPU"), 06504},  {S("PLPR"), 06511},  {S("PLPU"), 06512},   {S("PLDD"), 06514},  {S("PLPL"), 06521},
+    {S("PLUD"), 06522},   {S("PLPD"), 06524},  {S("RCSF"), 06631},  {S("RCSP"), 06671},   {S("RCRA"), 06632},  {S("RCSE"), 06671},
+    {S("RCRB"), 06634},   {S("RCRD"), 06674},  {S("CRSF"), 06632},  {S("CERS"), 06634},   {S("CRRB"), 06671},  {S("CRSA"), 06672},
+    {S("CRSB"), 06674},   {S("CPSF"), 06631},  {S("CPSE"), 06642},  {S("CPLB"), 06644},   {S("CPCF"), 06641},  {S("LCF"), 06652},
+    {S("LPR"), 06655},    {S("LSF"), 06661},   {S("LCB"), 06662},   {S("LLB"), 06664},    {S("DRCR"), 06603},  {S("DRCF"), 06611},
+    {S("DRTS"), 06615},   {S("DRSC"), 06622},  {S("DRCW"), 06605},  {S("DREF"), 06612},   {S("DRSE"), 06621},  {S("DRCN"), 06624},
+    {S("MSCR"), 06701},   {S("MTS"), 06706},   {S("MNC"), 06712},   {S("MSWF"), 06721},   {S("MCWF"), 06722},  {S("MIWF"), 06722},
+    {S("MDEF"), 06732},   {S("MEEF"), 06732},  {S("MTRS"), 06734},  {S("MRWC"), 06742},   {S("MCD"), 06702},   {S("MSUR"), 06711},
+    {S("MTC"), 06716},    {S("MDWF"), 06722},  {S("MEWF"), 06722},  {S("MSEF"), 06731},   {S("MCED"), 06732},  {S("MIEF"), 06732},
+    {S("MCC"), 06741},    {S("MRCA"), 06744},  {S("MCA"), 06745},   {S("TSRD"), 06715},   {S("TSWR"), 06716},  {S("TSSR"), 06722},
+    {S("TWRT"), 06731},   {S("TSRS"), 06734},  {S("TIFM"), 06707},  {S("TSDF"), 06721},   {S("TSST"), 06724},  {S("TCPI"), 06732},
+    {S("TTINCR"), 06401}, {S("TTI"), 06402},   {S("TTO"), 06404},   {S("TTCL"), 06411},   {S("TTSL"), 06412},  {S("TTRL"), 06414},
+    {S("TTSKP"), 06421},  {S("TTXON"), 06422}, {S("TTXOF"), 06424}, {S("FEXT"), 00000},   {S("FADD"), 01000},  {S("FSUB"), 02000},
+    {S("FMPY"), 03000},   {S("FDIV"), 04000},  {S("FGET"), 05000},  {S("FPUT"), 06000},   {S("FNOR"), 07000},  {S("TSF"), 06041},
+    {S("TCF"), 06042},    {S("TLS"), 06046},   {S("TPC"), 06044},   {S("BSW"),  07002},
 
     {S("AND"), 00000, T_MEM_REF},
     {S("TAD"), 01000, T_MEM_REF},
@@ -123,6 +92,17 @@ typedef enum {
     B_DEC,
     B_HEX,
 } Base;
+
+static inline String string_strip(String s) {
+    while (*s.string == ' ' && s.length > 0) {
+        s.length--;
+        s.string++;
+    }
+    while (s.string[s.length-1] == ' ' && s.length > 0) {
+        s.length--;
+    }
+    return s;
+}
 
 static inline int s_atoi(String s, Base base) {
     int b;
@@ -189,7 +169,7 @@ typedef struct {
 
 typedef enum {
     LEX_END,
-    LEX_ADDRESS,
+    LEX_STAR,
     LEX_NAME,
     LEX_INST,
     LEX_INT,
@@ -205,7 +185,7 @@ typedef enum {
 
 const char *const lex_names[] = {
     [LEX_END] = "<EOF>",
-    [LEX_ADDRESS] = "<address>",
+    [LEX_STAR] = "`*`",
     [LEX_NAME] = "<name>",
     [LEX_INST] = "<INST>",
     [LEX_INT] = "<int>",
@@ -261,7 +241,9 @@ uint16_t ram[4096] = { 0 };
 // ----
 
 static inline bool find_name(int16_t *out, String name) {
-    for (size_t i = 0; i < names.len; i++) {
+    if (names.len < 1) return false;
+    size_t i = names.len;
+    while (i-->0) {
         if (string_eq(names.data[i].name, name)) {
             *out = names.data[i].value;
             return true;
@@ -313,8 +295,8 @@ Token _expect_any(Token t, size_t count, TokenKind *ks) {
 
 Token expect(Token t, TokenKind k) {
     if (t.kind != k) {
-        fprintf(stderr, "%s:%d:%d Expected %s but got %s\n", PLOC(t.loc),
-                lex_names[k], lex_names[t.kind]);
+        fprintf(stderr, "%s:%d:%d Expected %s but got %s (%.*s)\n", PLOC(t.loc),
+                lex_names[k], lex_names[t.kind], PS(t.str));
         exit(1);
     }
     return t;
@@ -333,22 +315,11 @@ Token next_token(Lexer *lex) {
         while (*lex->code != '\n')
             eat_char(lex);
         return next_token(lex);
-    case '*': {
+    case '*':
         eat_char(lex);
-        String addr = {
-            .string = lex->code,
-            .length = 0,
-        };
-        while (isdigit(*lex->code)) {
-            eat_char(lex);
-            addr.length++;
-        }
-        return (Token){
-            .kind = LEX_ADDRESS,
-            .str = addr,
-            .loc = lex->loc
-        };
-    } break;
+        return (Token){.kind = LEX_STAR,
+                       .str = (String){lex->code-1, 1},
+                       .loc = lex->loc};
     case '=':
         eat_char(lex);
         return (Token){.kind = LEX_EQ,
@@ -490,8 +461,10 @@ int16_t parse_expr(Lexer *lex, Base base, int16_t addr, Token *bp_cause) {
     return v;
 }
 
-int16_t assemble_mnemonic(Lexer *lex, Mnemonic mnem, Base *base, int16_t *addr, Token *bp_cause) {
-    Loc l = expect(next_token(lex), LEX_INST).loc;
+int16_t assemble_mnemonic(Lexer *lex, Base base, int16_t addr, Token *bp_cause) {
+    Mnemonic mnem;
+    Token t = expect(next_token(lex), LEX_INST);
+    find_mnem(&mnem, t.str);
     switch (mnem.kind) {
     case T_MEM_REF: {
         int16_t I = 0, Z = 0;
@@ -499,14 +472,19 @@ int16_t assemble_mnemonic(Lexer *lex, Mnemonic mnem, Base *base, int16_t *addr, 
             next_token(lex);
             I = 1<<8;
         }
-        int16_t v = parse_expr(lex, *base, *addr, bp_cause);
-        if (v > 0200) {
+        char *expr_start = lex->code;
+        int16_t v = parse_expr(lex, base, addr, bp_cause);
+        if (v >= 0200) {
             Z = 1<<7;
         }
         if (v >= 0) {
-            if (v/128 != *addr/128 && Z != 0) {
-                fprintf(stderr, "%s:%d:%d: %o is not on the same page as %o\n",
-                        PLOC(l), v, *addr);
+            if (v/128 != addr/128 && Z != 0 && I == 0) {
+                String name = string_strip((String){expr_start, (int)(lex->code - expr_start)});
+                fprintf(stderr,
+                        "%s:%d:%d: `%.*s` (%o) is not on the same page as "
+                        "current address (%o)\n",
+                        PLOC(t.loc), PS(name),
+                        v, addr);
                 exit(1);
             }
             return mnem.opcode | I | Z | (v & 0x7F);
@@ -522,11 +500,19 @@ int16_t assemble_mnemonic(Lexer *lex, Mnemonic mnem, Base *base, int16_t *addr, 
 
 void assemble_once(Lexer *lex, Base *base, int16_t *addr) {
     switch (peek_token(lex).kind) {
-    case LEX_ADDRESS:
-        *addr = s_atoi(next_token(lex).str, *base);
-        break;
+    case LEX_STAR: {
+        BackpatchEntry potential_bp = (BackpatchEntry){
+            .addr = *addr,
+            .base = *base,
+            .lexer = *lex,
+        };
+        next_token(lex);
+        int16_t next_addr = parse_expr(lex, *base, *addr, &potential_bp.cause);
+        if (next_addr < 0) TODO();
+        if (next_addr >= ARRLEN(ram)) TODO();
+        *addr = next_addr;
+    } break;
     case LEX_INST: {
-        Mnemonic mnem;
         BackpatchEntry potential_bp = (BackpatchEntry){
             .cause = peek_token(lex),
             .addr = *addr,
@@ -536,6 +522,7 @@ void assemble_once(Lexer *lex, Base *base, int16_t *addr) {
         if (peek_token_n(lex, 2).kind == LEX_EQ) {
             Token t = next_token(lex);
             next_token(lex);
+            Mnemonic mnem;
             if (!find_mnem(&mnem, t.str)) UNREACHABLE();
             int16_t n = parse_expr(lex, *base, *addr, &potential_bp.cause);
             if (n < 0) {
@@ -555,11 +542,9 @@ void assemble_once(Lexer *lex, Base *base, int16_t *addr) {
         while (peek_token(lex).kind != LEX_NEWLINE && peek_token(lex).kind != LEX_END) {
             Token t = expect(peek_token(lex), LEX_INST);
             potential_bp.cause = t;
-            if (find_mnem(&mnem, t.str)) {
-                int16_t o = assemble_mnemonic(lex, mnem, base, addr, &potential_bp.cause);
-                if (o >= 0) r |= o;
-                else da_append(backpatch, potential_bp);
-            } else UNREACHABLE();
+            int16_t o = assemble_mnemonic(lex, *base, *addr, &potential_bp.cause);
+            if (o >= 0) r |= o;
+            else da_append(backpatch, potential_bp);
         }
         ram[(*addr)++] = r;
     } break;
@@ -574,6 +559,18 @@ void assemble_once(Lexer *lex, Base *base, int16_t *addr) {
             *base = B_OCT;
             break;
         }
+        if (string_eq(peek_token(lex).str, S("PAGE"))) {
+            next_token(lex);
+            int16_t old_addr = *addr;
+            if (peek_token(lex).kind == LEX_INT) {
+                int16_t n = s_atoi(next_token(lex).str, *base);
+                *addr = (128*n)%(36*128);
+            } else {
+                int16_t round_addr = (*addr)/128*128;
+                *addr = (round_addr+128)%(36*128);
+            }
+            break;
+        }
         BackpatchEntry potential_bp = (BackpatchEntry){
             .addr = *addr,
             .base = *base,
@@ -581,12 +578,23 @@ void assemble_once(Lexer *lex, Base *base, int16_t *addr) {
         };
         Token t = next_token(lex);
         switch (peek_token(lex).kind) {
-        case LEX_EQ:
+        case LEX_EQ: {
+            int16_t v;
             next_token(lex);
-            String vs = expect(next_token(lex), LEX_INT).str;
-            int16_t v = s_atoi(vs, *base);
-            da_append(names, ((NameEntry){t.str, v}));
-            break;
+            Token ve = expect_any(peek_token(lex), LEX_NAME, LEX_INT, LEX_INST);
+            switch (ve.kind) {
+            case LEX_INST: 
+                v = assemble_mnemonic(lex, *base, *addr, &potential_bp.cause);
+                break;
+            case LEX_INT:
+            case LEX_NAME:
+                v = parse_expr(lex, *base, *addr, &potential_bp.cause);
+                break;
+            default: UNREACHABLE();
+            }
+            if (v < 0) da_append(backpatch, potential_bp);
+            else da_append(names, ((NameEntry){t.str, v}));
+        } break;
         case LEX_COMMA:
             da_append(names, ((NameEntry){t.str, *addr}));
             next_token(lex);
@@ -617,13 +625,35 @@ void assemble_once(Lexer *lex, Base *base, int16_t *addr) {
         fprintf(stderr, "%s:%d:%d\n", PLOC(peek_token(lex).loc));
         TODO();
         break;
-    case LEX_DOT:
-        TODO();
-        break;
-    case LEX_MINUS:
-        fprintf(stderr, "%s:%d:%d\n", PLOC(peek_token(lex).loc));
-        TODO();
-        break;
+    case LEX_DOT: {
+        BackpatchEntry potential_bp = (BackpatchEntry){
+            .addr = *addr,
+            .base = *base,
+            .lexer = *lex,
+        };
+        int16_t v = parse_expr(lex, *base, *addr, &potential_bp.cause);
+        if (v < 0) {
+            da_append(backpatch, potential_bp);
+            (*addr)++;
+        } else {
+            ram[(*addr)++] = v;
+        }
+    } break;
+    case LEX_MINUS: {
+        BackpatchEntry potential_bp = (BackpatchEntry){
+            .addr = *addr,
+            .base = *base,
+            .lexer = *lex,
+        };
+        next_token(lex);
+        int16_t v = s_atoi(expect(next_token(lex), LEX_INT).str, *base);
+        int16_t dv = 0;
+        TokenKind kind;
+        if (is_kind_binop(kind = peek_token(lex).kind))
+            dv = parse_expr(lex, *base, *addr, &potential_bp.cause);
+        if (dv < 0) da_append(backpatch, potential_bp);
+        else ram[(*addr)++] = ((1<<12)-v + dv * (kind == LEX_MINUS ? -1 : 1))%(1<<12);
+    } break;
     case LEX_PLUS:
         TODO();
         break;
