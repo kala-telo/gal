@@ -76,7 +76,7 @@ Mnemonic mnemonics[] = {
 
 #define UNREACHABLE()                                                          \
     do {                                                                       \
-        fprintf(stderr, "%s:%d: UNREACHABLE -- It shouldn've not happen...\n", \
+        fprintf(stderr, "%s:%d: UNREACHABLE -- It should've not happen...\n",  \
                 __FILE__, __LINE__);                                           \
         abort();                                                               \
     } while (0)
@@ -117,14 +117,23 @@ static inline int s_atoi(String s, Base base) {
         b = 8;
         break;
     case B_HEX:
-        TODO();
+        // the funniest thing is that there is no hexadecimal in any docs
+        // (or reference source code), so i just made it up and there is no
+        // way to use it
         b = 16;
         break;
     }
     int64_t result = 0;
     for (int len = 0; len < s.length; len++) {
         result *= b;
-        result += s.string[len] - '0';
+        char c = s.string[len];
+        if (c >= '0' && c <= '9')
+            result += c - '0';
+        else if (c >= 'A' && c <= 'Z')
+            result += c - 'A';
+        else if (c >= 'a' && c <= 'z')
+            result += c - 'a';
+        else TODO();
     }
     return result;
 }
@@ -237,8 +246,22 @@ struct {
     size_t len, cap;
 } backpatch = { 0 };
 
-uint16_t ram[4096] = { 0 };
+typedef struct {
+    Loc loc;
+    int16_t v;
+    bool used;
+} RamEntry;
+RamEntry ram[4096] = {0};
 // ----
+
+static void put_entry_in_ram(int16_t addr, Loc loc, int16_t v) {
+    if (ram[addr].used) {
+        fprintf(stderr, "%s:%d:%d: Address %o was already used at %s:%d:%d (previous value %o, new %o)\n",
+                PLOC(loc), addr, PLOC(ram[addr].loc), ram[addr].v, v);
+        exit(1);
+    }
+    ram[addr] = (RamEntry){loc, v, true};
+}
 
 static inline bool find_name(int16_t *out, String name) {
     if (names.len < 1) return false;
@@ -541,12 +564,16 @@ void assemble_once(Lexer *lex, Base *base, int16_t *addr) {
         int16_t r = 0;
         while (peek_token(lex).kind != LEX_NEWLINE && peek_token(lex).kind != LEX_END) {
             Token t = expect(peek_token(lex), LEX_INST);
-            potential_bp.cause = t;
             int16_t o = assemble_mnemonic(lex, *base, *addr, &potential_bp.cause);
-            if (o >= 0) r |= o;
-            else da_append(backpatch, potential_bp);
+            if (o >= 0 && r >= 0) r |= o;
+            else r = -1;
         }
-        ram[(*addr)++] = r;
+        if (r >= 0) {
+            put_entry_in_ram((*addr)++, potential_bp.cause.loc, r);
+        } else {
+            da_append(backpatch, potential_bp);
+            (*addr)++;
+        }
     } break;
     case LEX_NAME: {
         if (string_eq(peek_token(lex).str, S("DECIMAL"))) {
@@ -609,14 +636,15 @@ void assemble_once(Lexer *lex, Base *base, int16_t *addr) {
                 da_append(backpatch, potential_bp);
                 (*addr)++;
             } else {
-                ram[(*addr)++] = v;
+                put_entry_in_ram((*addr)++, potential_bp.cause.loc, v);
             }
         } break;
         }
     } break;
-    case LEX_INT:
-        ram[(*addr)++] = s_atoi(next_token(lex).str, *base);
-        break;
+    case LEX_INT: {
+        Token t = next_token(lex);
+        put_entry_in_ram((*addr)++, t.loc, s_atoi(t.str, *base));
+    } break;
     case LEX_EQ:
         fprintf(stderr, "%s:%d:%d\n", PLOC(peek_token(lex).loc));
         TODO();
@@ -636,7 +664,7 @@ void assemble_once(Lexer *lex, Base *base, int16_t *addr) {
             da_append(backpatch, potential_bp);
             (*addr)++;
         } else {
-            ram[(*addr)++] = v;
+            put_entry_in_ram((*addr)++, potential_bp.cause.loc, v);
         }
     } break;
     case LEX_MINUS: {
@@ -651,8 +679,13 @@ void assemble_once(Lexer *lex, Base *base, int16_t *addr) {
         TokenKind kind;
         if (is_kind_binop(kind = peek_token(lex).kind))
             dv = parse_expr(lex, *base, *addr, &potential_bp.cause);
-        if (dv < 0) da_append(backpatch, potential_bp);
-        else ram[(*addr)++] = ((1<<12)-v + dv * (kind == LEX_MINUS ? -1 : 1))%(1<<12);
+        if (dv < 0) {
+            da_append(backpatch, potential_bp);
+            (*addr)++;
+        } else {
+            int16_t v = ((1 << 12) - v + dv * (kind == LEX_MINUS ? -1 : 1)) % (1 << 12);
+            put_entry_in_ram((*addr)++, potential_bp.cause.loc, v);
+        }
     } break;
     case LEX_PLUS:
         TODO();
@@ -663,9 +696,10 @@ void assemble_once(Lexer *lex, Base *base, int16_t *addr) {
     case LEX_SEMICOLON:
         TODO();
         break;
-    case LEX_CHARACTER:
-        ram[(*addr)++] = next_token(lex).str.string[0];
-        break;
+    case LEX_CHARACTER: {
+        Token t = next_token(lex);
+        put_entry_in_ram((*addr)++, t.loc, t.str.string[0]);
+    } break;
     case LEX_END:
         break;
     }
@@ -704,8 +738,8 @@ void export_dec_obj(FILE *out) {
     O(0x10);
     O(0x00);
     for (size_t i = 1; i < ARRLEN(ram); i++) {
-        O((ram[i] >> 6) & 0x3F);
-        O(ram[i] & 0x3F);
+        O((ram[i].v >> 6) & 0x3F);
+        O(ram[i].v & 0x3F);
     }
     fputc((checksum >> 6) & 0x3F, out);
     fputc(checksum & 0x3F, out);
@@ -734,7 +768,8 @@ int main(int argc, char *argv[]) {
         char *arg = next_arg(&argc, &argv, NULL);
         if (strcmp(arg, "-o") == 0) {
             output_file = next_arg(&argc, &argv, "Argument `-o` expects output filename next");
-        } else if (strcmp(arg, "-static") == 0) { // just compatibility with GAS
+        } else if (strcmp(arg, "-static") == 0) {
+            // just compatibility with GAS
         } else {
             if (!input_file) {
                 input_file = arg;
