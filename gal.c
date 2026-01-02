@@ -93,6 +93,13 @@ typedef enum {
     B_HEX,
 } Base;
 
+#define PLOC(x) (x).file, (x).line+1, (x).col+1
+typedef struct {
+    uint16_t line;
+    uint8_t col;
+    char *file;
+} Loc;
+
 static inline String string_strip(String s) {
     while (*s.string == ' ' && s.length > 0) {
         s.length--;
@@ -104,7 +111,21 @@ static inline String string_strip(String s) {
     return s;
 }
 
-static inline int s_atoi(String s, Base base) {
+static inline bool valid_base(char c, Base base) {
+    switch (base) {
+    case B_BIN:
+        return c == '1' || c == '0';
+    case B_DEC:
+        return '0' <= c && c <= '9';
+    case B_OCT:
+        return '0' <= c && c <= '7';
+    case B_HEX:
+        return ('0' <= c && c <= '9') || ('A' <= c && c <= 'Z');
+    }
+    return false;
+}
+
+static inline int s_atoi(Loc loc, String s, Base base) {
     int b;
     switch (base) {
     case B_BIN:
@@ -127,13 +148,17 @@ static inline int s_atoi(String s, Base base) {
     for (int len = 0; len < s.length; len++) {
         result *= b;
         char c = s.string[len];
+        if (!valid_base(c, base)) {
+            fprintf(stderr, "%s:%d:%d: unexpected characted %c for base %d\n",
+                    PLOC(loc), c, b);
+        }
         if (c >= '0' && c <= '9')
             result += c - '0';
         else if (c >= 'A' && c <= 'Z')
             result += c - 'A';
         else if (c >= 'a' && c <= 'z')
             result += c - 'a';
-        else TODO();
+        else UNREACHABLE();
     }
     return result;
 }
@@ -168,13 +193,6 @@ static inline bool find_mnem(Mnemonic *out, String name) {
     }
     return false;
 }
-
-#define PLOC(x) (x).file, (x).line+1, (x).col+1
-typedef struct {
-    uint16_t line;
-    uint8_t col;
-    char *file;
-} Loc;
 
 typedef enum {
     LEX_END,
@@ -420,9 +438,8 @@ Token next_token(Lexer *lex) {
         }
     }
 fail:
-    fprintf(stderr, "%s:%d:%d Unexpected value '%c' (%d)\n", lex->loc.file,
-            lex->loc.line + 1, lex->loc.col, *lex->code, *lex->code);
-    TODO();
+    fprintf(stderr, "%s:%d:%d Unexpected value '%c' (%d)\n", PLOC(lex->loc), *lex->code, *lex->code);
+    exit(1);
     return (Token) { 0 };
 }
 
@@ -451,7 +468,7 @@ int16_t parse_var_or_int(Lexer *lex, Base base, int16_t addr) {
         }
     } break;
     case LEX_INT:
-        return s_atoi(t.str, base);
+        return s_atoi(t.loc, t.str, base);
     case LEX_DOT:
         return addr;
     default:
@@ -586,11 +603,17 @@ void assemble_once(Lexer *lex, Base *base, int16_t *addr) {
             *base = B_OCT;
             break;
         }
+        if (string_eq(peek_token(lex).str, S("HEX"))) {
+            next_token(lex);
+            *base = B_HEX;
+            break;
+        }
         if (string_eq(peek_token(lex).str, S("PAGE"))) {
             next_token(lex);
             int16_t old_addr = *addr;
             if (peek_token(lex).kind == LEX_INT) {
-                int16_t n = s_atoi(next_token(lex).str, *base);
+                Token t = next_token(lex);
+                int16_t n = s_atoi(t.loc, t.str, *base);
                 *addr = (128*n)%(36*128);
             } else {
                 int16_t round_addr = (*addr)/128*128;
@@ -643,7 +666,7 @@ void assemble_once(Lexer *lex, Base *base, int16_t *addr) {
     } break;
     case LEX_INT: {
         Token t = next_token(lex);
-        put_entry_in_ram((*addr)++, t.loc, s_atoi(t.str, *base));
+        put_entry_in_ram((*addr)++, t.loc, s_atoi(t.loc, t.str, *base));
     } break;
     case LEX_EQ:
         fprintf(stderr, "%s:%d:%d\n", PLOC(peek_token(lex).loc));
@@ -674,7 +697,8 @@ void assemble_once(Lexer *lex, Base *base, int16_t *addr) {
             .lexer = *lex,
         };
         next_token(lex);
-        int16_t v = s_atoi(expect(next_token(lex), LEX_INT).str, *base);
+        Token t = expect(next_token(lex), LEX_INT);
+        int16_t v = s_atoi(t.loc, t.str, *base);
         int16_t dv = 0;
         TokenKind kind;
         if (is_kind_binop(kind = peek_token(lex).kind))
@@ -721,7 +745,7 @@ void assemble(Lexer *lex) {
     // then those are undefined variables
     for (size_t i = bp_count; i < backpatch.len; i++) { 
         BackpatchEntry bp = backpatch.data[i];
-        printf("%s:%d:%d: Error: Undefined name `%.*s`\n", PLOC(bp.cause.loc), PS(bp.cause.str));
+        fprintf(stderr, "%s:%d:%d: Error: Undefined name `%.*s`\n", PLOC(bp.cause.loc), PS(bp.cause.str));
     }
     if (backpatch.len > bp_count) {
         exit(1);
